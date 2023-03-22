@@ -1,103 +1,76 @@
-# DTS User Guide
+# @joseaburt/sequelize-query-encoder
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with DTS. Let’s get you oriented with what’s here and how to use it.
+This is a lightweight library to convert (encode and decode) http search requests.
 
-> This DTS setup is meant for developing libraries (not apps!) that can be published to NPM. If you’re looking to build a Node app, you could use `ts-node-dev`, plain `ts-node`, or simple `tsc`.
-
-> If you’re new to TypeScript, checkout [this handy cheatsheet](https://devhints.io/typescript)
-
-## Commands
-
-DTS scaffolds your new library inside `/src`.
-
-To run DTS, use:
+## Installation
 
 ```bash
-npm start # or yarn start
+npm install sequelize-search-builder-encode
+
+yarn add sequelize-search-builder-encode
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+## Usage
 
-To do a one-off build, use `npm run build` or `yarn build`.
-
-To run tests, use `npm test` or `yarn test`.
-
-## Configuration
-
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
-
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle Analysis
-
-[`size-limit`](https://github.com/ai/size-limit) is set up to calculate the real cost of your library with `npm run size` and visualize the bundle with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/src
-  index.ts        # EDIT THIS
-/test
-  index.test.ts   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
-```
-
-### Rollup
-
-DTS uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
-
-### TypeScript
-
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `dts` [optimizations docs](https://github.com/weiran-zsd/dts-cli#optimizations). In particular, know that you can take advantage of development-only optimizations:
+Example based on Express framework.
 
 ```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
+import { decode, encode } from 'sequelize-search-builder-encode';
 
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
-}
+const query = {
+  filter: {
+    emailAddress: {
+      like: '%maria@gmail%',
+    },
+    contactPhone: {
+      like: '%911%',
+      _condition: 'or',
+    },
+    name: {
+      like: '%MARIA%',
+    },
+    fiscalId: {
+      like: '%xxxx%',
+    },
+    _condition: 'and',
+  },
+};
+
+const url = 'https://codesandbox.io?name=2';
+
+const encodedQueryString = encode(url, query);
+console.log(encodedQueryString);
+// Output:
+//  https://codesandbox.io?name=2&page=0&size=2&include=false&filter%5BemailAddress%5D%5Blike%5D%3D%25maria%40gmail%25&filter%5BcontactPhone%5D%5Blike%5D%3D%25911%25&filter%5BcontactPhone%5D%5B_condition%5D%3Dor&filter%5Bname%5D%5Blike%5D%3D%25MARIA%25&filter%5BfiscalId%5D%5Blike%5D%3D%25xxxx%25&filter%5B_condition%5D%3Dand&filter%5Bname%5D%3Ddesc&filter%5BfiscalId%5D%3Dasc
+
+const decoded = decode(encodedQueryString);
+console.log(decoded);
+// Output:
+// {
+//   base_url: 'https://codesandbox.io',
+//   url: 'https://codesandbox.io?name=2',
+//   user_params: { name: '2' },
+//   query: {
+//     page: 0,
+//     size: 2,
+//     include: false,
+//     filter: {
+//       emailAddress: [Object],
+//       contactPhone: [Object],
+//       name: [Object],
+//       fiscalId: [Object],
+//       _condition: 'and'
+//     },
+//     order: { name: 'desc', fiscalId: 'asc' }
+//   }
+// }
 ```
 
-You can also choose to install and use [invariant](https://github.com/weiran-zsd/dts-cli#invariant) and [warning](https://github.com/weiran-zsd/dts-cli#warning) functions.
+## Contribute
 
-## Module Formats
+You are Welcome =)
+Keep in mind:
 
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. DTS has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
+```sh
+npm run test
+```
