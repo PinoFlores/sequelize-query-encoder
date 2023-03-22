@@ -1,6 +1,9 @@
-export const sum = (a: number, b: number) => {
-  if ('development' === process.env.NODE_ENV) {
-    console.log('dev only output');
-  }
-  return a + b;
-};
+import { encode, parse } from './encoder';
+
+export const queryParser = parse;
+
+export { decode } from './decoder';
+export { encode } from './encoder';
+
+const URLEncoder = encode;
+export default URLEncoder;
